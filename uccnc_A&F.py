@@ -15,7 +15,7 @@ import datetime
 import Path.Post.Utils as PostUtils
 from builtins import open as pyopen
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 TOOLTIP = """ Post processeur de notre machine.
 
@@ -28,24 +28,23 @@ UCCNC_post.export(object,"/path/to/file.ncc","")
 #    The preamble text will appear at the beginning of the GCODE output file.
 PREAMBLE_DEFAULT = """
 (Debut en-tete)
-G00 (Déplacement rapide)
 G17 (Sélection du plan XY)
-G21 (Millimètres)
 G40 (Annulation de la compensation de rayon d'outil)
 G49 (Désactivation de la compensation de longueur d'outil)
 G54 (Activation de l'offset de travail G54)
 G80 (Annulation des cycles)
 G90 (Mode de positionnement absolu)
 G94 (Mode d'avance en mm/min)
+G53 Z-1 (Retour origine machgine en Z)
 (Fin en-tete)
 
 """
 
 PREAMBLE_DEFAULT_NO_COMMENT = """
 (Debut en-tete)
-G17 G21 G49 G94
-G00 G40 G80 G90
-G54
+G17 G49 G94
+G40 G80 G90
+G53 Z-1
 (Fin en-tete)
 
 """
@@ -60,6 +59,7 @@ M05 (Arrêt de la rotation de broche)
 G40 (Annulation de la compensation de rayon d'outil)
 G80 (Annulation des cycles)
 G53 Z-1 (Retour au Z d'origine)
+G53 Y-1 (Retour au Y d'origine)
 M30 (Arret du programme et retour au début)
 (Programme fini)
 """
@@ -69,6 +69,7 @@ POSTAMBLE_DEFAULT_NO_COMMENT = """
 G40 G80
 M05
 G53 Z-1
+G53 Y-1
 M30
 (Programme fini)
 """
@@ -617,7 +618,7 @@ def parse(pathobj):
                     commandlist.append(tool_height)
 
             if "M3" in commandlist:
-                out += linenumber() + "G04 X5\n"
+                out += linenumber() + "G04 P5000\n"
 
             if command == "message":
                 if OUTPUT_COMMENTS is False:
