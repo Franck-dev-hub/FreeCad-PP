@@ -59,7 +59,7 @@ M05 (Arrêt de la rotation de broche)
 G40 (Annulation de la compensation de rayon d'outil)
 G80 (Annulation des cycles)
 G53 Z-1 (Retour au Z d'origine)
-G53 Y-1 (Retour au Y d'origine)
+G53 Y200 (Retour au Y d'origine)
 M30 (Arret du programme et retour au début)
 (Programme fini)
 """
@@ -69,7 +69,7 @@ POSTAMBLE_DEFAULT_NO_COMMENT = """
 G40 G80
 M05
 G53 Z-1
-G53 Y-1
+G53 Y200
 M30
 (Programme fini)
 """
