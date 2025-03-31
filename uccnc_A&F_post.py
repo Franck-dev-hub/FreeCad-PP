@@ -15,7 +15,7 @@ import datetime
 import Path.Post.Utils as PostUtils
 from builtins import open as pyopen
 
-VERSION = "1.1"
+VERSION = "1.2"
 
 TOOLTIP = """ Post processeur de notre machine.
 
@@ -162,10 +162,17 @@ REPEAT_ARGUMENTS = False
 
 # USE_TLO possible values:
 #   bool        Set tool length offset.
-#    True        G43 will be output following tool changes
+#    True        G43 will be output following tool changes.
 #    False       No G43 used.
 #                set with --tool-length-offset
 USE_TLO = False
+
+# TOOL_CHANGEMENT possible values:
+#   bool        Set tool changement on/off.
+#    True        Enable tool changement (M6).
+#    False       Disable tool changement.
+#                set with --tool-changement
+TOOL_CHANGEMENT = False
 
 # PRECISION possible values:
 #   int         Number of digits in axis positions
@@ -241,6 +248,10 @@ parser.add_argument(
     action="store_true",
     help="suppress tool length offset G43 following tool changes",
 )
+parser.add_argument(
+    "--tool-changement",
+    action="store_true",
+    help="Enable / disable M6 for tool changement")
 parser.add_argument("--repeat", action="store_true", help="repeat axis arguments")
 TOOLTIP_ARGS = parser.format_help()
 
@@ -605,20 +616,23 @@ def parse(pathobj):
             lastcommand = command
             currLocation.update(c.Parameters)
 
-
+            if "M3" in commandlist:
+                out += append(" ".join(commandlist) + "\n")
+                out += append("G04 P5000\n")
+                commandlist = []
 
             # Check for Tool Change:
             if command == "M6":
-                for line in TOOL_CHANGE.splitlines(True):
-                    out += linenumber() + line
+                if TOOL_CHANGEMENT:
+                    for line in TOOL_CHANGE.splitlines(True):
+                        out += linenumber() + line
 
-                # add height offset
-                if USE_TLO:
-                    tool_height = "\nG43 H" + str(int(c.Parameters["T"]))
-                    commandlist.append(tool_height)
-
-            if "M3" in commandlist:
-                out += linenumber() + "G04 P5000\n"
+                    # add height offset
+                    if USE_TLO:
+                        tool_height = "\nG43 H" + str(int(c.Parameters["T"]))
+                        commandlist.append(tool_height)
+                else:
+                    commandlist = []
 
             if command == "message":
                 if OUTPUT_COMMENTS is False:
