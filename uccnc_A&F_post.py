@@ -15,7 +15,7 @@ import datetime
 import Path.Post.Utils as PostUtils
 from builtins import open as pyopen
 
-VERSION = "1.2"
+VERSION = "1.3"
 
 TOOLTIP = """ Post processeur de notre machine.
 
@@ -428,6 +428,12 @@ def export(objectslist, filename, argstring):
             gcode += append("(operation initialise: %s)\n" % obj.Label)
         for line in PRE_OPERATION.splitlines(True):
             gcode += append(line)
+
+        # Affichage de l'outil utilisé
+        if hasattr(obj, "ToolController"):
+            tool = obj.ToolController
+            if hasattr(tool, "Name"):
+                gcode += append("(Outil: {})\n".format(tool.Name))
 
         # turn coolant on if required
         if hasattr(obj, "CoolantMode"):
